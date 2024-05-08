@@ -4,9 +4,9 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol"; // Para aquellas acciones que solo el dueño pueda usar
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "./mainERC721.sol";
+import "./boletosNFTs.sol";
 
 contract  loteria is ERC20, Ownable{
     // Sabemos que ERC20 y ERC721 usan funciones que algunas se llaman igual. Tendremos conflicto si ambas las heredamos
@@ -238,98 +238,3 @@ contract  loteria is ERC20, Ownable{
 
 }
 
-contract boletosNFTs{
-
-    // Estructura de datos
-    // Datos relevantes del propietario
-    struct Owner{
-        address direccionPropietario;
-        address contratoPadre;
-        address contratoNFT;
-        address contratoUsuario; // Esta variable define a este mismo Smart Contract
-    }
-
-    Owner public propietario;
-
-    // Constructor. Aqui definimos la informacion que va a recibir de Registro
-    constructor(address _propietario, address _contratoPadre, address _contratoNFT) {
-        
-        // Una manera de hacerlo:
-        // propietario = Owner(_propietario, _contratoPadre, _contratoNFT, address(this));
-
-        // Otra manera:
-        propietario.direccionPropietario = _propietario;
-        propietario.contratoPadre = _contratoPadre;
-        propietario.contratoNFT = _contratoNFT;
-        propietario.contratoUsuario = address(this);
-    }
-
-
-    // Conversion de los numeros de los boletos de loteria a un NFT
-    // safeMint crea tokens NFTs. Esta funcion haria lo mismo? Vamos a llamar a esa funcion de otro SC. Asi lo vemos
-    function mintBoleto(address _propietario, string memory tipoActivo, string memory activo, uint duracion, string memory tipoPrediccion, string memory rangoPrediccion) public returns (uint256){
-        
-        // Añadimos este require para que solo lo ejecute el SC loteria
-        require(msg.sender == propietario.contratoPadre,"No tiene permisos para ejecutar esta funcion");
-
-        // Puede haber varios mainERC721, referenciamos a su direccion: mainERC721(direccion)
-        // La funcion es internal, solo se puede usar por herencia
-        // O hacemos la funcion publica pero eso es un peligro
-        // Esta funcion tampoco puede ser publica ya que se llama a la otra funcion. Mucho cuidado
-        // Filtramos para que pueda acceder solo el SC que queremos
-        // Devolvemos el identificador
-        mainERC721 contratoNFT = mainERC721(propietario.contratoNFT);
-        return contratoNFT.safeMint(_propietario, tipoActivo, activo, duracion, tipoPrediccion, rangoPrediccion);
-    }
-}
-
-contract mainERC721 is ERC721{
-
-    // Empleamos esa funcionalidad de openzeppelin para el conteo de tokens
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
-
-    // Gracias a esta podremos llamar a usersInfo y comprobar quien llama a safeMint
-    address public direccionLoteria;
-
-    // Estructura para almacenar los metadatos de cada NFT
-    struct NFTMetadata {
-        string tipoActivo;
-        string activo;
-        uint duracion;
-        string tipoPrediccion;
-        string rangoPrediccion;
-    }
-
-    // Mapping de tokenId a sus metadatos
-    mapping(uint256 => NFTMetadata) public tokenMetadatos;
-
-    // Aqui si que lo puedo colocar como herencia ya que no habra colapso de funciones por que es otro contrato distinto
-    constructor() ERC721("Loteria", "STE"){
-        // Recordar que este SC se despliega automáticamente por loteria, por lo que el sender es ese SC
-        direccionLoteria = msg.sender;
-    }
-
-    // Creacion de NFTs. Esta funcion no puede ser public, ya que todos emitirian
-    // Esta funcion queremos que la llame unicamente el SC boletosNFT. Para eso usamos usersInfo
-    function safeMint(address _propietario, string memory tipoActivo, string memory activo, uint duracion, string memory tipoPrediccion, string memory rangoPrediccion) public returns(uint256){
-
-        // Solo puede ejecutar esta funcion el SC de boletoNFT de ese propietario
-        require(msg.sender == loteria(direccionLoteria).usersInfo(_propietario), "No tienes permisos para ejecutar esta funcion");
-
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-        _safeMint(_propietario, newItemId);   // Funcion propia del estandar 
-
-        // Almacenar metadatos
-        tokenMetadatos[newItemId] = NFTMetadata(tipoActivo, activo, duracion, tipoPrediccion, rangoPrediccion);
-        return newItemId;
-    }
-
-    // Función para obtener los metadatos de un NFT. Getter para mostrar la info a User
-    function getNFTMetadata(uint256 tokenId) public view returns (NFTMetadata memory) {
-        require(_exists(tokenId), "ERC721Metadata: Metadata query for nonexistent token");
-        return tokenMetadatos[tokenId];
-    }
-
-}
