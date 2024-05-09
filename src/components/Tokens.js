@@ -207,25 +207,27 @@ class Tokens extends Component {
             <main role="main" className="col-lg-12 d-flex text-center">
               <div className="content mr-auto ml-auto">
                 <h1>Gestión de los Tokens ERC-20</h1>
-                &nbsp;  {/*Espacio*/}
                 
+                &nbsp;  {/*Espacio*/}
+                &nbsp;
+
                 {/*SERÁ UNA FILA CON TRES COLUMNAS. CADA COLUMNA ES UN FORMULARIO*/}
                 <Container>                  
                   <Row>
-                    {/* PRIMERA TABLA: CONSULTAR TOKENS USUARIO */}
+                    {/* PRIMERA COLUMNA: CONSULTAR TOKENS USUARIO */}
                     <Col>
-                      <h3> Tokens usuario </h3>
+                      <h3> Tus Tokens </h3>
                       <form onSubmit={(event) => {
                         event.preventDefault()  // Esto no se que hace del todo
                         this._balanceTokens()
                       }} >
                         <input type="submit"
-                          className="bbtn btn-block btn-success btn-sm"
+                          className="bbtn btn-block btn-primary btn-sm"
                           value="BALANCE DE TOKENS" />
                       </form>
                     </Col>
 
-                    {/* SEGUNDA TABLA: CONSULTAR TOKENS DEL SC */}
+                    {/* SEGUNDA COLUMNA: CONSULTAR TOKENS DEL SC */}
                     <Col>
                       <h3> Tokens SC </h3>
                       <form onSubmit={(event) => {
@@ -233,12 +235,12 @@ class Tokens extends Component {
                         this._balanceTokensSC()
                       }} >
                         <input type="submit"
-                          className="bbtn btn-block btn-info btn-sm"
+                          className="bbtn btn-block btn-primary btn-sm"
                           value="BALANCE DE TOKENS (SC)" />
                       </form>
                     </Col>
 
-                    {/* TERCERA TABLA: CONSULTAR ETHERS DEL SC (BOTE)*/}
+                    {/* TERCERA COLUMNA: CONSULTAR ETHERS DEL SC (BOTE)*/}
                     <Col>
                       <h3> Ethers SC </h3>
                       <form onSubmit={(event) => {
@@ -246,13 +248,14 @@ class Tokens extends Component {
                         this._balanceEthersSC()
                       }}>
                         <input type="submit"
-                          className="bbtn btn-block btn-danger btn-sm"
+                          className="bbtn btn-block btn-primary btn-sm"
                           value="BALANCE DE ETHERS (SC)" />
                       </form>
                     </Col>
                   </Row>
                 </Container>
 
+                &nbsp;
                 &nbsp;
 
                 {/* COMPRA DE TOKENS */}
@@ -269,13 +272,15 @@ class Tokens extends Component {
                     ref={(input) => this._numTokens = input} />
 
                   <input type="submit"
-                    className="bbtn btn-block btn-primary btn-sm"
+                    className="bbtn btn-block btn-success btn-sm"
                     value="COMPRAR TOKENS" />
                 </form>
 
                 &nbsp;
+                &nbsp;
                 
                 {/* DEVOLUCION DE TOKENS */}
+                {/*
                 <h3> Devolución de tokens ERC-20 </h3>
 
                 <form onSubmit={(event) => {
@@ -294,6 +299,7 @@ class Tokens extends Component {
                     value="DEVOLVER TOKENS" />
 
                 </form>
+                */}
               </div>
             </main>
           </div>

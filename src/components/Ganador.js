@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import smart_contract from '../abis/loteria.json';
+import smart_contract from '../abis/gestorGanadores.json';
 import Web3 from 'web3';
 import Swal from 'sweetalert2';
 
@@ -64,11 +64,9 @@ class Ganador extends Component {
   }
 
   _generarGanador = async () => {
+    this.setState({ loading: true });
     try {
-      console.log("Generacion del ganador en ejecucion...")
-      await this.state.contract.methods.generarGanador().send({
-        from: this.state.account
-      })
+      await this.state.contract.methods.generarGanador().send({ from: this.state.account });
       Swal.fire({
         icon: 'success',
         title: '¡Ganador generado correctamente!',
@@ -79,37 +77,73 @@ class Ganador extends Component {
           left top
           no-repeat
         `
-      })
+      });
     } catch (err) {
-      this.setState({ errorMessage: err })
-    } finally {
-      this.setState({ loading: false })
-    }
-  }
-
-  _ganador = async () => {
-    try {
-      const winner = await this.state.contract.methods.ganador().call()
-      console.log("El ganador es: ", winner)
       Swal.fire({
-        icon: 'info',
-        title: 'El ganador de la Lotería es:',
-        text: `${winner}`,
+        icon: 'error',
+        title: '¡Error al generar el ganador!',
+        text: `${err.message}`,
         width: 800,
         padding: '3em',
         backdrop: `
-          rgba(15, 238, 168, 0.2)
+          rgba(255, 0, 0, 0.4)
           left top
           no-repeat
         `
-      })
-    } catch (err) {
-      this.setState({ errorMessage: err })
+      });
     } finally {
-      this.setState({ loading: false })
+      this.setState({ loading: false });
     }
   }
-  
+
+  _obtenerGanadores = async () => {
+    this.setState({ loading: true });
+    try {
+        const ganadores = await this.state.contract.methods.getGanadoresConDetalles().call();
+        console.log("Ganadores: ", ganadores);
+
+        // Construir la tabla HTML
+        let tableHtml = '<table style="width:100%"><tr><th>Dirección</th><th>Boleto ID</th><th>Tipo Activo</th><th>Identificador Activo</th><th>Duración</th></tr>';
+        ganadores.forEach(g => {
+            tableHtml += `<tr>
+                            <td>${g.direccion}</td>
+                            <td>${g.boletoId}</td>
+                            <td>${g.detallesLoteria.tipoActivo}</td>
+                            <td>${g.detallesLoteria.identificadorActivo}</td>
+                            <td>${g.detallesLoteria.duracion}</td>
+                          </tr>`;
+        });
+        tableHtml += '</table>';
+
+        Swal.fire({
+            icon: 'info',
+            title: 'Ganadores cargados correctamente',
+            width: 1200,
+            html: tableHtml, // Usar html en lugar de text para renderizar la tabla
+            padding: '3em',
+            backdrop: `
+                rgba(15, 238, 168, 0.2)
+                left top
+                no-repeat
+            `
+        });
+
+    } catch (err) {
+        console.error("Error al cargar los ganadores:", err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al cargar los ganadores',
+            text: `${err.message}`,
+            width: 800,
+            padding: '3em'
+        });
+    } finally {
+        this.setState({ loading: false });
+    }
+};
+
+
+
 
   render() {
     return (
@@ -133,15 +167,15 @@ class Ganador extends Component {
                 </form>
 
                 &nbsp;
-                
+
                 {/*Formulario para ver el ganador*/}
                 <form onSubmit={(event) => {
-                  event.preventDefault()
-                  this._ganador()
+                  event.preventDefault();
+                  this._obtenerGanadores();
                 }}>
                   <input type="submit"
-                    className="bbtn btn-block btn-success btn-sm"
-                    value="VISUALIZAR GANADOR" />
+                    className="btn btn-block btn-warning btn-sm"
+                    value="VER GANADORES" />
                 </form>
               </div>
             </main>

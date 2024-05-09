@@ -209,7 +209,7 @@ class Loteria extends Component {
     
             Swal.fire({
                 icon: 'info',
-                title: 'Tus boletos son:',
+                title: 'Tu historial de boletos',
                 width: 800,
                 html: tableHtml, // Usar html en lugar de text para renderizar la tabla
                 padding: '3em',
@@ -255,6 +255,7 @@ class Loteria extends Component {
         return (
             <div>
                 <Navigation account={this.state.account} />
+                <MyCarousel />
                 <div className="container-fluid mt-5">
                     <div className="row">
                         <main role="main" className="col-lg-12 d-flex text-center">
@@ -277,7 +278,7 @@ class Loteria extends Component {
                                                 <Form.Label>Tipo de activo</Form.Label>
                                                 <Form.Control as="select" name="tipoActivo" value={this.state.tipoActivo} onChange={this.handleOptionChange}>
                                                     <option value="">Seleccione una opción</option>
-                                                    <option value="Índice">Índice</option>
+                                                    <option value="Indice">Índice</option>
                                                     <option value="Acciones">Acciones</option>
                                                 </Form.Control>
                                             </Form.Group>
@@ -287,7 +288,7 @@ class Loteria extends Component {
                                                 <Form.Label>Identificador del activo</Form.Label>
                                                 <Form.Control as="select" name="activo" value={this.state.activo} onChange={this.handleOptionChange}>
                                                     <option value="">Seleccione una opción</option>
-                                                    {this.state.tipoActivo === "Índice" && (
+                                                    {this.state.tipoActivo === "Indice" && (
                                                         <>
                                                             <option value="IBEX35">IBEX35</option>
                                                             <option value="DAX30">DAX30</option>
