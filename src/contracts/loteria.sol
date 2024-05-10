@@ -4,15 +4,15 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol"; // Para aquellas acciones que solo el dueño pueda usar
 import "./mainERC721.sol";
 import "./boletosNFTs.sol";
 import "./gestorGanadores.sol";
 
-contract  loteria is ERC20, Ownable{
+contract  loteria is ERC20{
 
     // CONSTRUCTOR
     constructor(address payable _gestorGanadoresAddress) ERC20("LoteriaV&D", "V&D"){
+        owner = msg.sender;
         _mint(address(this), 1000);     // Ponemos la direccion del propio Smart Contract en vez del sender para que este no se lleve los tokens
         nft = address(new mainERC721());    // Vamos a hacer que cuando se despliegue este contratro se despliegue automaticamente mainNFT
         ganadoresAdress = payable(_gestorGanadoresAddress);
@@ -21,6 +21,7 @@ contract  loteria is ERC20, Ownable{
     }
 
     // VARIABLES
+    address public owner;
     address public nft;
     address payable public ganadoresAdress;
     gestorGanadores public contractGanadores; 
@@ -38,6 +39,12 @@ contract  loteria is ERC20, Ownable{
     struct BoletoMetadata {
             uint tokenId;
             mainERC721.NFTMetadata metadata;
+    }
+
+    // MODIFICADORES
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Caller is not the owner");
+        _;
     }
 
     //===========================
@@ -136,7 +143,7 @@ contract  loteria is ERC20, Ownable{
         // El SC envia los ethers al usuario
         //payable(msg.sender).transfer(precioTokens(_numTokens)); // Funcion de Solidity
 
-    //}
+    }
 
     // =====================
     // Gestion de la loteria
