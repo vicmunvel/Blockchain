@@ -66,7 +66,8 @@ class Ganador extends Component {
   _generarGanador = async () => {
     this.setState({ loading: true });
     try {
-      await this.state.contract.methods.generarGanador().send({ from: this.state.account });
+      const monto = await this.state.contract.methods.generarGanador().send({ from: this.state.account });
+      console.log("CANTIDAD GANADA POR EL USUARIO:", monto);
       Swal.fire({
         icon: 'success',
         title: '¡Ganador generado correctamente!',

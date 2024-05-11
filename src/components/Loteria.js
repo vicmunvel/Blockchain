@@ -12,7 +12,7 @@ import Navigation from './Navbar';
 import MyCarousel from './Carousel';
 
 // Nuevo: Form
-import { Container, Form, Button } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 
 
 
@@ -81,7 +81,7 @@ class Loteria extends Component {
     // FUNCION DE COMPRA DE BOLETOS
     _compraBoletos = async (_numBoletos) => {
         // Verificamos que todos los campos están completos
-        const { tipoActivo, activo, duracion, tipoPrediccion, rangoPrediccion, contract, account } = this.state;
+        const { tipoActivo, activo, duracion, tipoPrediccion, rangoPrediccion } = this.state;
         const numBoletos = this._numBoletos.value;
         const duracionInt = parseInt(duracion); // Convertimos a entero ya que el SC espera un uint en este campo
 

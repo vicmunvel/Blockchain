@@ -275,31 +275,7 @@ class Tokens extends Component {
                     className="bbtn btn-block btn-success btn-sm"
                     value="COMPRAR TOKENS" />
                 </form>
-
-                &nbsp;
-                &nbsp;
-                
-                {/* DEVOLUCION DE TOKENS */}
-                {/*
-                <h3> Devolución de tokens ERC-20 </h3>
-
-                <form onSubmit={(event) => {
-                  event.preventDefault()
-                  const cantidad = this._numTokensDevolver.value
-                  this._devolverTokens(cantidad)
-                }}>
-
-                  <input type="number"
-                    className="form-control mb-1"
-                    placeholder="Cantidad de tokens a devolver"
-                    ref={(input) => this._numTokensDevolver = input} />
-
-                  <input type="submit"
-                    className="bbtn btn-block btn-warning btn-sm"
-                    value="DEVOLVER TOKENS" />
-
-                </form>
-                */}
+        
               </div>
             </main>
           </div>

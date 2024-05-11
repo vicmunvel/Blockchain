@@ -17,7 +17,7 @@ contract  loteria is ERC20{
         nft = address(new mainERC721());    // Vamos a hacer que cuando se despliegue este contratro se despliegue automaticamente mainNFT
         ganadoresAdress = payable(_gestorGanadoresAddress);
         contractGanadores = gestorGanadores(_gestorGanadoresAddress);
-        contractGanadores.setLoteriaAddress(address(this)); // Enviamos la direccion de este contrato al de gestion de ganadores
+        contractGanadores.setLoteriaAddress(msg.sender, address(this)); // Enviamos la direccion de este contrato al de gestion de ganadores
     }
 
     // VARIABLES
@@ -25,7 +25,7 @@ contract  loteria is ERC20{
     address public nft;
     address payable public ganadoresAdress;
     gestorGanadores public contractGanadores; 
-    uint256 public precioToken = 1 ether;   // 1 Ether por Token ERC20
+    uint public precioToken = 1 ether;   // 1 Ether por Token ERC20
     uint public precioBoleto = 5;           // 5 Tokens ERC-20
     uint [] boletosComprados;
     bytes32[] uniqueMetaHashes;
@@ -88,7 +88,6 @@ contract  loteria is ERC20{
         return usuario_contract[_account];
     }
 
-
     // ===================================
     // Compra y devolucion de Tokens ERC20
     // ===================================
@@ -126,25 +125,6 @@ contract  loteria is ERC20{
         enviarFondosAGestor(msg.value-returnValue);
     }
 
-    // ESTA FUNCION NO LA PONEMOS POR QUE SINO SUPERA EL SIZE CODE EL CONTRATO
-    // Devolucion de tokens. Ej: El usuario compro 10 tokens y al final solo gasta 5 en boletos, devolvemos esos 5 sobrantes
-    //function devolverTokens (uint _numTokens) public payable {
-        
-        // El numero de Tokens debe ser mayor a 0
-        //require(_numTokens >= 0, "Necesitas devolver un numero de tokens mayor a 0");
-
-        // El usuario debe acreditar tener los tokens que quiere devolver
-        //require(_numTokens <= balanceTokens(msg.sender), "No tienes los tokens que deseas devolver");
-
-        // Hacemos la transferencia. 
-        // El usuario transfiere tokens al SC
-        //_transfer(msg.sender, address(this), _numTokens);   // Funcion del estandar ya que son ERC20
-
-        // El SC envia los ethers al usuario
-        //payable(msg.sender).transfer(precioTokens(_numTokens)); // Funcion de Solidity
-
-    }
-
     // =====================
     // Gestion de la loteria
     // =====================
@@ -174,7 +154,7 @@ contract  loteria is ERC20{
             // Crea un hash de los metadatos para registrar el boleto en GestorLoteria
             bytes32 metaHash = keccak256(abi.encodePacked(tipoActivo, activo, duracion));
 
-            contractGanadores.registrarBoleto(metaHash, newTokenId, msg.sender);
+            contractGanadores.registrarBoleto(metaHash, newTokenId, msg.sender, address(this));
         }
     }
 

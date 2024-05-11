@@ -36,11 +36,13 @@ contract gestorGanadores{
 
     // VARIABLES
     address private owner;
-    address public loteriaAddress;
+    address private loteriaAddress;
     string[] private tiposActivo = ["Indice", "Acciones"];
     string[] private identificadoresActivo = ["IBEX35", "DAX30", "FTSE100", "SAN", "BBVA", "TEF"];
     uint[] private duraciones = [1, 2, 3, 4];
-    bytes32[] public uniqueMetaHashes;
+    bytes32[] private uniqueMetaHashes;
+    uint private loteriaId = 1;
+    uint public comisionOwner = 5;  // 5%
 
     // CONSTRUCTOR
     constructor() {
@@ -55,7 +57,7 @@ contract gestorGanadores{
     }
 
     // FUNCION: Calculamos los hashes de todas las posibles loterias
-    function precomputarDetallesLoteria() private {
+    function precomputarDetallesLoteria() internal {
         for (uint i = 0; i < tiposActivo.length; i++) {
             for (uint j = 0; j < identificadoresActivo.length; j++) {
                 for (uint k = 0; k < duraciones.length; k++) {
@@ -70,49 +72,57 @@ contract gestorGanadores{
         }
     }
 
-    // FUNCION: Getter para obtener los detalles de una loteria por su hash
-    function getDetallesLoteria(bytes32 metaHash) public view returns (DetallesLoteria memory) {
-        require(detallesPorMetaHash[metaHash].duracion != 0, "Loteria no registrada.");
-        return detallesPorMetaHash[metaHash];
-    }
-
     // FUNCION: Registramos los nuevos boletos en su loteria correspondiente
-    function registrarBoleto(bytes32 metaHash, uint boletoId, address user) external {
+    function registrarBoleto(bytes32 metaHash, uint boletoId, address user , address _loteriaAddress) external {
+        require(loteriaAddress == _loteriaAddress, "No puede llamar a esta funcion");
         require(detallesPorMetaHash[metaHash].duracion != 0, "Loteria no registrada.");
-        boletosPorMetadatos[metaHash].push(boletoId);
+        
+        bytes32 clave = keccak256(abi.encodePacked(metaHash, loteriaId));
+
+        boletosPorMetadatos[clave].push(boletoId);
         direccionUsuarioBoleto[boletoId] = user;
     }
 
     // FUNCION: Generamos un ganador de forma aleatoria para cada loteria activa
-    function generarGanador() public onlyOwner{
+    function generarGanador() public onlyOwner returns(uint){
+
         loteria contractLoteria = loteria(loteriaAddress);
         require(uniqueMetaHashes.length > 0, "No hay loterias registradas.");
 
         uint precioBoleto = contractLoteria.getPrecioBoleto();
         uint precioToken = contractLoteria.getPrecioToken();
-
+        uint montoFinalUser;
+        uint montoFinalOwner;
         for (uint i = 0; i < uniqueMetaHashes.length; i++) {
             bytes32 metaHash = uniqueMetaHashes[i];
-            uint[] memory boletos = boletosPorMetadatos[metaHash];
+            bytes32 clave = keccak256(abi.encodePacked(metaHash, loteriaId));
+
+            uint[] memory boletos = boletosPorMetadatos[clave];
+            
             if (boletos.length > 0) {
+                
                 uint ganadorIndex = uint(keccak256(abi.encodePacked(block.timestamp, i))) % boletos.length;
                 uint ganadorBoletoId = boletos[ganadorIndex];
                 address direccionGanador = direccionUsuarioBoleto[ganadorBoletoId];
                 uint montoGanado = boletos.length * precioBoleto * precioToken;
 
-                ganadoresPorLoteria[metaHash] = Ganador({
+                ganadoresPorLoteria[clave] = Ganador({
                     boletoId: ganadorBoletoId,
                     direccion: direccionGanador,
                     metaHash: metaHash,
                     montoGanado: montoGanado
                 });
 
-                realizarPago(payable(direccionGanador), montoGanado);
+                montoFinalUser = montoGanado * (100 - comisionOwner) / 100;
+                montoFinalOwner = montoGanado * comisionOwner / 100;
 
-                // Limpiamos los boletos para esa lotería
-                delete boletosPorMetadatos[metaHash];
-            }
+                realizarPago(payable(direccionGanador), montoFinalUser);    // Pagamos al ganador
+                realizarPago(payable(owner), montoFinalOwner);              // Recibimos la comision           
+            }            
         }
+
+        loteriaId++;
+        return montoFinalUser;
     }
     
     // FUNCION: La llamamos para realizar pagos
@@ -122,22 +132,22 @@ contract gestorGanadores{
     }
 
     // FUNCION: Setter para establecer la dirección del Smart Contract "loteria.sol"
-    function setLoteriaAddress(address _loteriaAddress) public{
+    function setLoteriaAddress(address _ownerAddress, address _loteriaAddress) public{
+        require(owner == _ownerAddress, "Acceso restringido");
         loteriaAddress = _loteriaAddress;
     }
 
-    // FUNCION: Getter para obtener todos los metaHashes únicos
-    function getUniqueMetaHashes() external view returns (bytes32[] memory) {
-        return uniqueMetaHashes;
-    }
-
     // FUNCION: Recogemos todos los ganadores de todas las loterias
-    function getGanadoresConDetalles() public view returns (GanadorConDetalles[] memory) {
+    function getGanadoresConDetalles() public returns (GanadorConDetalles[] memory) {
         uint validGanadoresCount = 0;
+        loteriaId--;
 
         // Primero contamos cuántos ganadores válidos existen
         for (uint i = 0; i < uniqueMetaHashes.length; i++) {
-            if (ganadoresPorLoteria[uniqueMetaHashes[i]].boletoId != 0) {
+
+            bytes32 clave = keccak256(abi.encodePacked(uniqueMetaHashes[i], loteriaId));
+
+            if (ganadoresPorLoteria[clave].boletoId != 0) {
                 validGanadoresCount++;
             }
         }
@@ -147,18 +157,19 @@ contract gestorGanadores{
         uint j = 0;
         for (uint i = 0; i < uniqueMetaHashes.length; i++) {
             bytes32 metaHash = uniqueMetaHashes[i];
-            if (ganadoresPorLoteria[metaHash].boletoId != 0) {
-                Ganador memory ganador = ganadoresPorLoteria[metaHash];
+            bytes32 clave = keccak256(abi.encodePacked(metaHash, loteriaId));
+            if (ganadoresPorLoteria[clave].boletoId != 0) {
+                Ganador memory ganador = ganadoresPorLoteria[clave];
                 DetallesLoteria memory detalles = detallesPorMetaHash[metaHash];
                 validGanadores[j++] = GanadorConDetalles({
                     boletoId: ganador.boletoId,
                     direccion: ganador.direccion,
                     montoGanado: ganador.montoGanado,
                     detallesLoteria: detalles
-                });
+                });                
             }
         }
-
+        loteriaId++;
         return validGanadores;
     }
 
