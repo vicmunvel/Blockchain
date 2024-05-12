@@ -11,7 +11,6 @@ import Col from 'react-bootstrap/Col';
 import Navigation from './Navbar';
 import MyCarousel from './Carousel';
 
-// Nuevo: Form
 import { Form, Button } from 'react-bootstrap';
 
 
@@ -91,7 +90,7 @@ class Loteria extends Component {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Por favor, complete todos los campos antes de comprar boletos.',
+                text: 'Por favor, complete todos los campos antes de realizar la comprar.',
                 confirmButtonText: 'Entendido',
                 width: 800,
                 padding: '3em',
@@ -129,6 +128,7 @@ class Loteria extends Component {
 
         } catch (err) {
             this.setState({ errorMessage: err })
+            console.log(err);
             Swal.fire({
                 icon: 'error',
                 title: 'Error en la transacción',
@@ -154,7 +154,7 @@ class Loteria extends Component {
             console.log("Precio del boleto: ", _precio)
             Swal.fire({
                 icon: 'info',
-                title: `El precio del boleto es de ${_precio} tokens (ERC-20)`,
+                title: `El precio del boleto es de ${_precio} tokens V&D`,
                 width: 800,
                 padding: '3em',
                 backdrop: `

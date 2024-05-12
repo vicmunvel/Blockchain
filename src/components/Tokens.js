@@ -74,11 +74,11 @@ class Tokens extends Component {
     try {
       const _balance = await this.state.contract.methods.balanceTokens(this.state.account).call()
       console.log("Balance de tokens: ", _balance)
-      
+
       // Todo esto esta sacado de la web de Sweetalert
       Swal.fire({
         icon: 'info',
-        title: 'Balance de tokens:',
+        title: 'Tu balance de tokens V&D es:',
         width: 800,
         padding: '3em',
         text: `${_balance} tokens`, // Pasamos la variable
@@ -101,7 +101,7 @@ class Tokens extends Component {
       console.log("Balance de tokens del Smart Contract: ", _balanceTokensSC)
       Swal.fire({
         icon: 'info',
-        title: 'Balance de tokens del Smart Contract:',
+        title: 'Los tokens disponibles actualmente son:',
         width: 800,
         padding: '3em',
         text: `${_balanceTokensSC} tokens`,
@@ -121,7 +121,7 @@ class Tokens extends Component {
   _balanceEthersSC = async () => {
     try {
       const _balanceEthersSC = await this.state.contract.methods.balanceEthersSC().call()
-      console.log("Balance de Ethers del Smart Contract: ", _balanceEthersSC)
+      console.log("El balance de Ethers del Smart Contract es: ", _balanceEthersSC)
       Swal.fire({
         icon: 'info',
         title: 'Balance de ethers del Smart Contract:',
@@ -142,6 +142,36 @@ class Tokens extends Component {
   }
 
 
+  _showLoteriaInfo = () => {
+    Swal.fire({
+      icon: 'info',
+      title: '¿Cómo funciona la Lotería?',
+      html: `
+        <p style="text-align: justify;">
+          Participa en loterías sobre apuestas de activos financieros, donde puedes apostar sobre el porcentaje de rentabilidad que han dado en el periodo especificado. Si tu apuesta es correcta, entras en un sorteo para ganar el bote acumulado sobre ese activo en el mismo periodo de apuesta.
+        </p>
+        <ol style="text-align: left;">
+          <li> Compra tokens V&D, cuyo precio en ETH puedes consultar en la web.</li>
+          <li> Selecciona el activo financiero sobre el cual deseas apostar y define tu apuesta.</li>
+          <li> Compra tantos boletos como desees; a mayor número de boletos, mayores son tus probabilidades de ganar si aciertas la apuesta.</li>
+          <li> Los ganadores se generan al vencimiento del plazo de la apuesta.</li>
+          <li> Si ganas, se te transferirán los fondos acumulados de esa apuesta.</li>
+        </ol>
+        <p style="font-size: 12px; text-align: justify;">
+          El usuario se llevará el 95% del bote final, siendo el 5% restante comisión de servicio. En caso de que ningún usuario acierte (altamente improbable), el bote será para la plataforma.
+        </p>
+      `,
+      width: 800,
+      padding: '3em',
+      backdrop: `
+        rgba(0,0,123,0.4)
+        url("/images/nyan-cat.gif")
+        left top
+        no-repeat
+      `
+    });
+  }
+  
 
   // FUNCIONES PARA LA COMPRA Y DEVOLUCION DE TOKENS
   _compraTokens = async (_numTokens) => {
@@ -155,6 +185,7 @@ class Tokens extends Component {
       Swal.fire({
         icon: 'success',
         title: '¡Compra de tokens realizada!',
+        confirmButtonText: 'Gracias!',
         width: 800,
         padding: '3em',
         text: `Has comprado ${_numTokens} token/s por un valor de ${ethers / 10 ** 18} ether/s`,
@@ -164,32 +195,6 @@ class Tokens extends Component {
           no-repeat
         `
       })
-    } catch (err) {
-      this.setState({ errorMessage: err })
-    } finally {
-      this.setState({ loading: false })
-    }
-  }
-
-  _devolverTokens = async (_numTokens) => {
-    try {
-      await this.state.contract.methods.devolverTokens(_numTokens).send({
-        from: this.state.account
-      })
-      console.log("Devolucion de tokens: ", _numTokens)
-      Swal.fire({
-        icon: 'warning',
-        title: '¡Devolución de tokens ERC-20!',
-        width: 800,
-        padding: '3em',
-        text: `Se han devuelto ${_numTokens} token/s`,
-        backdrop: `
-            rgba(15, 238, 168, 0.2)
-            left top
-            no-repeat
-          `
-      })
-
     } catch (err) {
       this.setState({ errorMessage: err })
     } finally {
@@ -207,12 +212,22 @@ class Tokens extends Component {
             <main role="main" className="col-lg-12 d-flex text-center">
               <div className="content mr-auto ml-auto">
                 <h1>Gestión de los Tokens ERC-20</h1>
-                
+
                 &nbsp;  {/*Espacio*/}
                 &nbsp;
+                <div className="text-center mt-4">
+                  <button onClick={this._showLoteriaInfo} className="btn btn-info">
+                    ¿Cómo funciona la Lotería?
+                  </button>
+                </div>
+
+                &nbsp;  {/*Espacio*/}
+                &nbsp;
+                &nbsp;
+
 
                 {/*SERÁ UNA FILA CON TRES COLUMNAS. CADA COLUMNA ES UN FORMULARIO*/}
-                <Container>                  
+                <Container>
                   <Row>
                     {/* PRIMERA COLUMNA: CONSULTAR TOKENS USUARIO */}
                     <Col>
@@ -223,7 +238,7 @@ class Tokens extends Component {
                       }} >
                         <input type="submit"
                           className="bbtn btn-block btn-primary btn-sm"
-                          value="BALANCE DE TOKENS" />
+                          value="BALANCE DE TOKENS V&D" />
                       </form>
                     </Col>
 
@@ -236,7 +251,7 @@ class Tokens extends Component {
                       }} >
                         <input type="submit"
                           className="bbtn btn-block btn-primary btn-sm"
-                          value="BALANCE DE TOKENS (SC)" />
+                          value="BALANCE DE TOKENS V&D (SC)" />
                       </form>
                     </Col>
 
@@ -257,16 +272,17 @@ class Tokens extends Component {
 
                 &nbsp;
                 &nbsp;
+                &nbsp;
 
                 {/* COMPRA DE TOKENS */}
-                <h3>Compra de Tokens ERC-20</h3> 
+                <h3>Compra de Tokens ERC-20</h3>
                 <form onSubmit={(event) => {
                   event.preventDefault()
                   const cantidad = this._numTokens.value // Recogemos el parametro que introduce el usuario en el input de abajo
                   this._compraTokens(cantidad)
                 }}>
                   {/*Input para recoger el numero de tokens */}
-                  <input type="number"  
+                  <input type="number"
                     className="form-control mb-1"
                     placeholder="Cantidad de tokens a comprar"
                     ref={(input) => this._numTokens = input} />
@@ -275,7 +291,7 @@ class Tokens extends Component {
                     className="bbtn btn-block btn-success btn-sm"
                     value="COMPRAR TOKENS" />
                 </form>
-        
+
               </div>
             </main>
           </div>

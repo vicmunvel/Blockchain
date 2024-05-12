@@ -16,7 +16,7 @@ contract  loteria is ERC20{
         _mint(address(this), 1000);     // Ponemos la direccion del propio Smart Contract en vez del sender para que este no se lleve los tokens
         nft = address(new mainERC721());    // Vamos a hacer que cuando se despliegue este contratro se despliegue automaticamente mainNFT
         ganadoresAdress = payable(_gestorGanadoresAddress);
-        contractGanadores = gestorGanadores(_gestorGanadoresAddress);
+        contractGanadores = gestorGanadores(ganadoresAdress);
         contractGanadores.setLoteriaAddress(msg.sender, address(this)); // Enviamos la direccion de este contrato al de gestion de ganadores
     }
 
@@ -152,9 +152,10 @@ contract  loteria is ERC20{
             ADNBoleto[newTokenId] = msg.sender;
             
             // Crea un hash de los metadatos para registrar el boleto en GestorLoteria
-            bytes32 metaHash = keccak256(abi.encodePacked(tipoActivo, activo, duracion));
+            bytes32 hashLoto = keccak256(abi.encodePacked(tipoActivo, activo, duracion));
+            bytes32 hashApuesta = keccak256(abi.encodePacked(tipoPrediccion, rangoPrediccion));
 
-            contractGanadores.registrarBoleto(metaHash, newTokenId, msg.sender, address(this));
+            contractGanadores.registrarBoleto(hashLoto, hashApuesta, newTokenId, msg.sender, address(this));
         }
     }
 

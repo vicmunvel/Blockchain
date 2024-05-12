@@ -82,7 +82,7 @@ class Ganador extends Component {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: '¡Error al generar el ganador!',
+        title: '¡Error al generar los ganadores!',
         text: `${err.message}`,
         width: 800,
         padding: '3em',
@@ -118,7 +118,7 @@ class Ganador extends Component {
 
         Swal.fire({
             icon: 'info',
-            title: 'Ganadores cargados correctamente',
+            title: 'Los ganadores de las loterías activas son:',
             width: 1200,
             html: tableHtml, // Usar html en lugar de text para renderizar la tabla
             padding: '3em',
@@ -143,9 +143,6 @@ class Ganador extends Component {
     }
 };
 
-
-
-
   render() {
     return (
       <div>
@@ -158,12 +155,13 @@ class Ganador extends Component {
 
                 {/*Formulario para generar el ganador*/}
                 <h1> Generación de un ganador en la Lotería</h1>
+                &nbsp;&nbsp;
                 <form onSubmit={(event) => {
                   event.preventDefault()
                   this._generarGanador()
                 }}>
                   <input type="submit"
-                    className="bbtn btn-block btn-info btn-sm"
+                    className="bbtn btn-block btn-success btn-sm"
                     value="GENERAR GANADOR" />
                 </form>
 
@@ -175,7 +173,7 @@ class Ganador extends Component {
                   this._obtenerGanadores();
                 }}>
                   <input type="submit"
-                    className="btn btn-block btn-warning btn-sm"
+                    className="btn btn-block btn-info btn-sm"
                     value="VER GANADORES" />
                 </form>
               </div>
