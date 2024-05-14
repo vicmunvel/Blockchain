@@ -89,21 +89,5 @@ contract('GestorGanadores', (accounts) => {
         
         });
     });
-
-
-    // describe('Pagos a ganadores', function() {
-    //     it('debe pagar correctamente al ganador', async () => {
-    //         const initialBalance = await web3.eth.getBalance(user);
-    //         const metaHash = await gestorGanadores.getUniqueMetaHashes();
-    //         const metaHashSample = metaHash[0];
-    //         const amount = web3.utils.toWei('1', 'ether');
-
-    //         await web3.eth.sendTransaction({from: owner, to: gestorGanadores.address, value: amount}); // Asegurarse de que el contrato tiene fondos.
-    //         await gestorGanadores.realizarPago(user, amount, {from: owner});
-
-    //         const finalBalance = await web3.eth.getBalance(user);
-    //         assert(finalBalance > initialBalance, 'El balance del ganador debe haber aumentado.');
-    //     });
-    // });
 });
 

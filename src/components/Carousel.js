@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
-import img1 from '../img/Logo.JPG';
-import img2 from '../img/Logo3.JPG';
-import img3 from '../img/Logo4.JPG';
+import img1 from '../img/Imagen1.jpeg';
+import img2 from '../img/Imagen2.jpeg';
+import img3 from '../img/Imagen3.jpeg';
 
 class MyCarousel extends Component {
     render() {
